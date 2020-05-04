@@ -339,7 +339,7 @@ function _list_of_all_completed_books($category_default_value = NULL, $subcatego
       LEFT JOIN list_of_category loc ON tcbm.main_category = loc.category_id
       WHERE po.proposal_status = 3 AND pe.approval_status = 1 AND pe.category>0
       AND pe.id = tcbm.pref_id AND loc.category_id= :category_id AND tcbm.sub_category = :sub_category", array(
-            "category_id" => $category_default_value,
+            ":category_id" => $category_default_value,
             ":sub_category" => $subcategory_default_value
         ));
     }
