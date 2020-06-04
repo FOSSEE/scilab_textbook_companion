@@ -42,3 +42,6 @@ xmlrpc.php
 *.swo
 *.swp
 *~
+
+
+pdf/temp_prcode/generated_qrcode.png
