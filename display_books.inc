@@ -181,7 +181,7 @@ function tbc_books_display_new_category_form($form, &$form_state)
         '#markup' => "Total number of completed books: " . $book_count.
                      "<br><span style='color:red;'>The links given below does ".
                      "not contain any parts of the book reproduced, These ".
-                     "links only contain the Scilab codes for the solved ".
+                     "links only contain the Scilab code for the solved ".
                      "examples from the book.</span>"
         );
     $form['category'] = array(
