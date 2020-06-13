@@ -170,11 +170,9 @@ function generate_pdf()
 	$pdf->Image($image4, $pdf->GetX(), $pdf->GetY(), 20, 0);
 	$pdf->SetY(-40);
 	$pdf->SetX(80);
-	$image3 = $path . "/pdf/images/iitb.png";
 	$image2 = $path . "/pdf/images/fossee.png";
 	$pdf->Image($image2, $pdf->GetX() - 15, $pdf->GetY() + 7, 40, 0);
 	$pdf->Image($pngAbsoluteFilePath, $pdf->GetX() + 50, $pdf->GetY() - 5, 30, 0);
-	$pdf->Image($image3, $pdf->GetX() + 110, $pdf->GetY() + 3, 15, 0);
 	$pdf->Image($image4, $pdf->GetX() - 15, $pdf->GetY() + 28, 150, 0);
 	$pdf->SetFont('times', 'I', 8);
 	$pdf->SetTextColor(0, 0, 0);
