@@ -60,7 +60,7 @@ function list_chapters()
 		return;
 	} //!$preference_data
 	/************************ end approve book details **************************/
-	$return_html = '<h4><strong><span style="color:#FF0000">Due to limited access to the books, the review process will be slow on Scilab.in</span></strong></h4>';
+	$return_html = '<h4><strong><span style="color:#FF0000">Due to limited access to the books, the review process will be slow.</span></strong></h4>';
 	//$return_html .= '<br />';
 	$return_html .= '<strong>Title of the Book:</strong><br />' . $preference_data->book . '<br /><br />';
 	$return_html .= '<strong>Contributor Name:</strong><br />' . $proposal_data->full_name . '<br /><br />';
