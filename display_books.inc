@@ -304,25 +304,25 @@ function _list_of_all_completed_books($category_default_value = NULL, $subcatego
     {
         $preference_q = db_query("SELECT DISTINCT pe.book, count( pe.book) c,tcbm.sub_category,tcbm.main_category as category_id,
       pe.author as author, pe.publisher as publisher, pe.year as year, pe.id as pe_id, pe.edition,
-      po.approval_date as approval_date
+      po.approval_date as approval_date, po.completion_date as completion_date, po.full_name as full_name, po.university as university
       FROM {textbook_companion_preference} pe
       LEFT JOIN textbook_companion_proposal po ON pe.proposal_id = po.id
       LEFT JOIN textbook_companion_book_main_subcategories tcbm ON pe.id = tcbm.pref_id
       LEFT JOIN list_of_category loc ON tcbm.main_category = loc.category_id
       WHERE po.proposal_status = 3 AND pe.approval_status = 1 AND pe.category>0
-      AND pe.id = tcbm.pref_id GROUP BY pe.id having c >= 1 ORDER BY pe.book");
+      AND pe.id = tcbm.pref_id GROUP BY pe.id having c >= 1 ORDER BY po.completion_date DESC");
     } //$category_default_value <= 0 && $subcategory_default_value == NULL
     elseif ($category_default_value > 0 && $subcategory_default_value == NULL)
     {
         $preference_q = db_query("SELECT DISTINCT (loc.category_id),count( pe.book) c, tcbm.sub_category,loc.maincategory,
       pe.book as book, pe.author as author, pe.publisher as publisher, pe.year as year, pe.id as pe_id, pe.edition,
-      po.approval_date as approval_date
+      po.approval_date as approval_date, po.completion_date as completion_date, po.full_name as full_name, po.university as university
       FROM {textbook_companion_preference} pe
       LEFT JOIN textbook_companion_proposal po ON pe.proposal_id = po.id
       LEFT JOIN textbook_companion_book_main_subcategories tcbm ON pe.id = tcbm.pref_id
       LEFT JOIN list_of_category loc ON tcbm.main_category = loc.category_id
       WHERE po.proposal_status = 3 AND pe.approval_status = 1 AND pe.category>0
-      AND pe.id = tcbm.pref_id AND loc.category_id= :category_id GROUP BY pe.id having c >= 1 ORDER BY pe.book", array(
+      AND pe.id = tcbm.pref_id AND loc.category_id= :category_id GROUP BY pe.id having c >= 1 ORDER BY po.completion_date DESC", array(
             "category_id" => $category_default_value
         ));
     } //$category_default_value > 0 && $subcategory_default_value == NULL
@@ -330,13 +330,13 @@ function _list_of_all_completed_books($category_default_value = NULL, $subcatego
     {
         $preference_q = db_query("SELECT DISTINCT (loc.category_id),tcbm.sub_category,loc.maincategory,
       pe.book as book, pe.author as author, pe.publisher as publisher, pe.year as year, pe.id as pe_id, pe.edition,
-      po.approval_date as approval_date
+      po.approval_date as approval_date, po.completion_date as completion_date, po.full_name as full_name, po.university as university
       FROM textbook_companion_preference pe
       LEFT JOIN textbook_companion_proposal po ON pe.proposal_id = po.id
       LEFT JOIN textbook_companion_book_main_subcategories tcbm ON pe.id = tcbm.pref_id
       LEFT JOIN list_of_category loc ON tcbm.main_category = loc.category_id
       WHERE po.proposal_status = 3 AND pe.approval_status = 1 AND pe.category>0
-      AND pe.id = tcbm.pref_id AND loc.category_id= :category_id AND tcbm.sub_category = :sub_category", array(
+      AND pe.id = tcbm.pref_id AND loc.category_id= :category_id AND tcbm.sub_category = :sub_category ORDER BY po.completion_date DESC", array(
             ":category_id" => $category_default_value,
             ":sub_category" => $subcategory_default_value
         ));
@@ -345,7 +345,10 @@ function _list_of_all_completed_books($category_default_value = NULL, $subcatego
     {
         $proposal_rows[] = array(
             $i,
-            l($preference_data->book . " by " . $preference_data->author . ", " . $preference_data->publisher . ", " . $preference_data->year, 'textbook_run/' . $preference_data->pe_id . '/' . $preference_data->sub_category . '/' . $preference_data->category_id)
+            l($preference_data->book . " by " . $preference_data->author . ", " . $preference_data->publisher . ", " . $preference_data->year, 'textbook_run/' . $preference_data->pe_id . '/' . $preference_data->sub_category . '/' . $preference_data->category_id),
+            $preference_data->full_name,
+            $preference_data->university,
+            date("Y", $preference_data->completion_date)
         );
         $i++;
     } //$proposal_data = $proposal_q->fetchObject()
@@ -358,7 +361,10 @@ function _list_of_all_completed_books($category_default_value = NULL, $subcatego
     {
         $proposal_header = array(
             'No.',
-            'Title of the Book'
+            'Title of the Book',
+            'Contributor Name',
+            'University / Institute',
+            'Year of Completion'
         );
         $output .= theme('table', array(
             'header' => $proposal_header,
