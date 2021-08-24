@@ -577,8 +577,7 @@ function proposal_approval_form_submit($form, &$form_state)
 	$query = "
     UPDATE textbook_companion_aicte
     SET status = 0, uid = 0, proposal_id = 0, preference_id = 0
-    WHERE proposal_id = {:proposal_id} AND preference_id != {:preference_id}
-  ";
+    WHERE proposal_id = :proposal_id AND preference_id != :preference_id";
 	db_query($query, array(
 		':proposal_id' => $proposal_id,
 		':preference_id' => $preference_id
