@@ -553,7 +553,7 @@ function textbook_companion_menu()
 		'file' => 'full_download.inc'
 	);
 	/* latex script for book generation */
-	$items['textbook_companion/generate_book'] = array(
+	/*$items['textbook_companion/generate_book'] = array(
 		'title' => 'Generate Book',
 		'description' => 'Generate Book From Latex Script',
 		'page callback' => 'textbook_companion_download_book',
@@ -562,7 +562,7 @@ function textbook_companion_menu()
 		),
 		'type' => MENU_CALLBACK,
 		'file' => 'latex.inc'
-	);
+	);*/
 	$items['textbook_companion/delete_book'] = array(
 		'title' => 'Delete Book PDF',
 		'description' => 'Delete Book PDF',
