@@ -588,7 +588,7 @@ function book_proposal_form($form, &$form_state, $row1 = NULL, $row2 = NULL, $ro
 	$form['city'] = array(
 		'#type' => 'select',
 		'#title' => t('City/Area'),
-		'#options' => _tbc_list_of_cities($selected_state, $selected_district),
+		'#options' => _tbc_list_of_cities($selected_state),
 		'#default_value' => '0',
 		'#empty_value' => '0',
 		'#empty_option' => '- Select -',
@@ -610,7 +610,7 @@ function book_proposal_form($form, &$form_state, $row1 = NULL, $row2 = NULL, $ro
 	$form['pincode'] = array(
 		'#type' => 'select',
 		'#title' => t('Pincode'),
-		'#options' => _tbc_list_of_city_pincode($selected_city, $selected_state, $selected_district),
+		'#options' => _tbc_list_of_city_pincode($selected_city, $selected_state),
 		'#prefix' => '<div id="ajax-pincode-list-replace">',
 		'#suffix' => '</div>',
 		'#empty_value' => '0',
@@ -1578,7 +1578,7 @@ function book_proposal_nonaicte_form($form, &$form_state)
 		'#suffix' => '</div>',
 		'#required' => TRUE,
 		'#ajax' => array(
-			'callback' => 'ajax_get_district_list_callback',
+			'callback' => 'ajax_get_city_list_callback',
 			),
 		'#validated' => TRUE,
 		'#states' => array(
@@ -1589,31 +1589,31 @@ function book_proposal_nonaicte_form($form, &$form_state)
 			)
 		)
 	);
-	$form['district'] = array(
-		'#type' => 'select',
-		'#title' => t('District/Area'),
-		'#options' => _tbc_list_of_district($selected_state),
-		'#empty_value' => '0',
-		'#empty_option' => '- Select -',
-		'#prefix' => '<div id="ajax-district-list-replace">',
-		'#suffix' => '</div>',
-		'#validated' => TRUE,
-		'#required' => TRUE,
-		'#ajax' => array(
-			'callback' => 'ajax_get_city_list_callback',
-			),
-		'#states' => array(
-			'invisible' => array(
-				':input[name="all_state"]' => array(
-					'value' => '0'
-				)
-			)
-		)
-	);
+	// $form['district'] = array(
+	// 	'#type' => 'select',
+	// 	'#title' => t('District/Area'),
+	// 	'#options' => _tbc_list_of_district($selected_state),
+	// 	'#empty_value' => '0',
+	// 	'#empty_option' => '- Select -',
+	// 	'#prefix' => '<div id="ajax-district-list-replace">',
+	// 	'#suffix' => '</div>',
+	// 	'#validated' => TRUE,
+	// 	'#required' => TRUE,
+	// 	'#ajax' => array(
+	// 		'callback' => 'ajax_get_city_list_callback',
+	// 		),
+	// 	'#states' => array(
+	// 		'invisible' => array(
+	// 			':input[name="all_state"]' => array(
+	// 				'value' => '0'
+	// 			)
+	// 		)
+	// 	)
+	// );
 	$form['city'] = array(
 		'#type' => 'select',
 		'#title' => t('City/Area'),
-		'#options' => _tbc_list_of_cities($selected_state, $selected_district),
+		'#options' => _tbc_list_of_cities($selected_state),
 		'#default_value' => '0',
 		'#empty_value' => '0',
 		'#empty_option' => '- Select -',
@@ -1635,7 +1635,7 @@ function book_proposal_nonaicte_form($form, &$form_state)
 	$form['pincode'] = array(
 		'#type' => 'select',
 		'#title' => t('Pincode'),
-		'#options' => _tbc_list_of_city_pincode($selected_city, $selected_state, $selected_district),
+		'#options' => _tbc_list_of_city_pincode($selected_city, $selected_state),
 		'#prefix' => '<div id="ajax-pincode-list-replace">',
 		'#suffix' => '</div>',
 		'#empty_value' => '0',
@@ -1888,10 +1888,6 @@ function book_proposal_nonaicte_form_validate($form, &$form_state)
 			form_set_error('all_state', t('Select state name'));
 			// $form_state['values']['country'] = $form_state['values']['other_country'];
 		} //$form_state['values']['all_state'] == ''
-		if ($form_state['values']['district'] == '0')
-		{
-			form_set_error('district', t('Select district name'));
-		}
 		if ($form_state['values']['city'] == '0')
 		{
 			form_set_error('city', t('Select city name'));
@@ -2103,9 +2099,9 @@ function ajax_get_city_list_callback($form, $form_state)
 {
     $state_default_value = $form_state['values']['all_state'];
     $district_default_value = $form_state['values']['district'];
-    if ($district_default_value != '0')
+    if ($state_default_value != '0')
     {
-        $form['city']['#options'] = _tbc_list_of_cities($state_default_value, $district_default_value);
+        $form['city']['#options'] = _tbc_list_of_cities($state_default_value);
         $commands[] = ajax_command_replace("#ajax-city-list-replace", drupal_render($form['city']));
         $form['pincode']['#options'] =  array('0' => '- Select -');
         $commands[] = ajax_command_replace("#ajax-pincode-list-replace", drupal_render($form['pincode']));
@@ -2149,7 +2145,7 @@ function ajax_get_city_pincode_list_callback($form, $form_state)
     $district_default_value = $form_state['values']['district'];
     if ($city_default_value != '0')
     {
-        $form['pincode']['#options'] = _tbc_list_of_city_pincode($city_default_value,$state_default_value,$district_default_value);
+        $form['pincode']['#options'] = _tbc_list_of_city_pincode($city_default_value,$state_default_value);
         $commands[] = ajax_command_replace("#ajax-pincode-list-replace", drupal_render($form['pincode']));
     }else{
         $form['pincode']['#options'] =  array('0' => '- Select -');

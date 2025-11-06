@@ -898,22 +898,17 @@ function proposal_edit_form($form, &$form_state, $nonaicte_book)
 	$query->fields('textbook_companion_proposal');
 	$query->condition('id', $proposal_id);
 	$proposal_q = $query->execute();
-	if ($proposal_q)
-	{
-		$proposal_data = $proposal_q->fetchObject();
-		if (!$proposal_data)
-		{
-			drupal_set_message(t('Invalid proposal selected. Please try again.'), 'error');
-			drupal_goto('manage_proposal');
-			return;
-		} //!$proposal_data
-	} //$proposal_q
-	else
-	{
-		drupal_set_message(t('Invalid proposal selected. Please try again.'), 'error');
-		drupal_goto('manage_proposal');
-		return;
-	}
+	$proposal_data = $proposal_q->fetchObject();
+// 	if (!$proposal_data) {
+//   if (isset($form_state['ajax'])) {
+//     // Return an error response for AJAX.
+//     $commands = array();
+//     $commands[] = ajax_command_alert(t('Invalid proposal selected. Please try again.'));
+//     $commands[] = ajax_command_redirect('manage_proposal');
+//     return array('#type' => 'ajax', '#commands' => $commands);
+  
+//   }
+
 	$user_data = user_load($proposal_data->uid);
 	$query = db_select('textbook_companion_preference');
 	$query->fields('textbook_companion_preference');
@@ -936,6 +931,12 @@ function proposal_edit_form($form, &$form_state, $nonaicte_book)
 	$query->range(0, 1);
 	$preference3_q = $query->execute();
 	$preference3_data = $preference3_q->fetchObject();
+	$state =  _tbc_list_of_states();
+	$selected_state = isset($form_state['values']['all_state'])?$form_state['values']['all_state']:$proposal_data->state;
+	$city = _tbc_list_of_cities();
+	$selected_city = isset($form_state['values']['city'])?$form_state['values']['city']:$proposal_data->city;
+	$pincode = _tbc_list_of_city_pincode();
+	$selected_pincode = isset($form_state['values']['pincode'])?$form_state['values']['pincode']:$proposal_data->pincode;
 	$form['full_name'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Full Name'),
@@ -1056,10 +1057,18 @@ function proposal_edit_form($form, &$form_state, $nonaicte_book)
 	);
 	$form['all_state'] = array(
 		'#type' => 'select',
-		'#title' => t('State'),
+		'#title' => t('State/UT'),
 		'#options' => _tbc_list_of_states(),
+		//'#empty_value' => '0',
+		//'#empty_option' => '- Select -',
+		'#default_value' => $selected_state,
+		'#prefix' => '<div id="ajax-state-list-replace">',
+		'#suffix' => '</div>',
+		'#required' => TRUE,
+		'#ajax' => array(
+			'callback' => 'manage_ajax_get_city_list_callback',
+			),
 		'#validated' => TRUE,
-		'#default_value' => $proposal_data->state,
 		'#states' => array(
 			'visible' => array(
 				':input[name="country"]' => array(
@@ -1070,27 +1079,29 @@ function proposal_edit_form($form, &$form_state, $nonaicte_book)
 	);
 	$form['city'] = array(
 		'#type' => 'select',
-		'#title' => t('City'),
-		'#options' => _tbc_list_of_cities(),
-		'#default_value' => $proposal_data->city,
-		'#states' => array(
-			'visible' => array(
-				':input[name="country"]' => array(
-					'value' => 'India'
-				)
-			)
-		)
+		'#title' => t('City/Area'),
+		'#options' => _tbc_list_of_cities($selected_state),
+		'#default_value' => $selected_city,
+		'#prefix' => '<div id="ajax-city-list-replace">',
+		'#suffix' => '</div>',
+		//'#validated' => TRUE,
+		'#required' => TRUE,
+		'#ajax' => array(
+			'callback' => 'manage_ajax_get_city_pincode_list_callback',
+			),
 	);
 	$form['pincode'] = array(
-		'#type' => 'textfield',
+		'#type' => 'select',
 		'#title' => t('Pincode'),
-		'#size' => 30,
-		'#maxlength' => 6,
-		'#default_value' => $proposal_data->pincode,
-		'#required' => False,
-		'#attributes' => array(
-			'placeholder' => 'Enter pincode....'
-		)
+		'#options' => _tbc_list_of_city_pincode($selected_city, $selected_state),
+		'#default_value' => $selected_pincode,
+		'#prefix' => '<div id="ajax-pincode-list-replace">',
+		'#suffix' => '</div>',
+		'#empty_value' => '0',
+		'#empty_option' => '- Select -',
+		'#required' => TRUE,
+		'#validated' => TRUE,
+		
 	);
 	$form['faculty'] = array(
 		'#type' => 'textfield',
@@ -1200,134 +1211,7 @@ function proposal_edit_form($form, &$form_state, $nonaicte_book)
 		'#required' => TRUE,
 		'#default_value' => $preference1_data->category
 	);
-	if ($preference2_data)
-	{
-		$form['preference2'] = array(
-			'#type' => 'fieldset',
-			'#title' => t('Book Preference 2'),
-			'#collapsible' => TRUE,
-			'#collapsed' => FALSE
-		);
-		$form['preference2']['book2'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Title of the book'),
-			'#size' => 30,
-			'#maxlength' => 100,
-			'#required' => TRUE,
-			'#default_value' => $preference2_data->book
-		);
-		$form['preference2']['author2'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Author Name'),
-			'#size' => 30,
-			'#maxlength' => 100,
-			'#required' => TRUE,
-			'#default_value' => $preference2_data->author
-		);
-		$form['preference2']['isbn2'] = array(
-			'#type' => 'textfield',
-			'#title' => t('ISBN No'),
-			'#size' => 30,
-			'#maxlength' => 25,
-			'#required' => TRUE,
-			'#default_value' => $preference2_data->isbn
-		);
-		$form['preference2']['publisher2'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Publisher & Place'),
-			'#size' => 30,
-			'#maxlength' => 50,
-			'#required' => TRUE,
-			'#default_value' => $preference2_data->publisher
-		);
-		$form['preference2']['edition2'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Edition'),
-			'#size' => 4,
-			'#maxlength' => 2,
-			'#required' => TRUE,
-			'#default_value' => $preference2_data->edition
-		);
-		$form['preference2']['year2'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Year of pulication'),
-			'#size' => 4,
-			'#maxlength' => 4,
-			'#required' => TRUE,
-			'#default_value' => $preference2_data->year
-		);
-		$form['preference2']['book_category_2'] = array(
-			'#type' => 'select',
-			'#title' => t('Category'),
-			'#options' => _tbc_list_of_category(),
-			'#required' => TRUE,
-			'#default_value' => $preference2_data->category
-		);
-	} //$preference2_data
-	if ($preference3_data)
-	{
-		$form['preference3'] = array(
-			'#type' => 'fieldset',
-			'#title' => t('Book Preference 3'),
-			'#collapsible' => TRUE,
-			'#collapsed' => FALSE
-		);
-		$form['preference3']['book3'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Title of the book'),
-			'#size' => 30,
-			'#maxlength' => 100,
-			'#required' => TRUE,
-			'#default_value' => $preference3_data->book
-		);
-		$form['preference3']['author3'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Author Name'),
-			'#size' => 30,
-			'#maxlength' => 100,
-			'#required' => TRUE,
-			'#default_value' => $preference3_data->author
-		);
-		$form['preference3']['isbn3'] = array(
-			'#type' => 'textfield',
-			'#title' => t('ISBN No'),
-			'#size' => 30,
-			'#maxlength' => 25,
-			'#required' => TRUE,
-			'#default_value' => $preference3_data->isbn
-		);
-		$form['preference3']['publisher3'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Publisher & Place'),
-			'#size' => 30,
-			'#maxlength' => 50,
-			'#required' => TRUE,
-			'#default_value' => $preference3_data->publisher
-		);
-		$form['preference3']['edition3'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Edition'),
-			'#size' => 4,
-			'#maxlength' => 2,
-			'#required' => TRUE,
-			'#default_value' => $preference3_data->edition
-		);
-		$form['preference3']['year3'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Year of pulication'),
-			'#size' => 4,
-			'#maxlength' => 4,
-			'#required' => TRUE,
-			'#default_value' => $preference3_data->year
-		);
-		$form['preference3']['book_category_3'] = array(
-			'#type' => 'select',
-			'#title' => t('Category'),
-			'#options' => _tbc_list_of_category(),
-			'#required' => TRUE,
-			'#default_value' => $preference3_data->category
-		);
-	} //$preference3_data
+	 //$preference3_data
 	/* hidden fields */
 	$form['hidden_proposal_id'] = array(
 		'#type' => 'hidden',
@@ -1342,6 +1226,46 @@ function proposal_edit_form($form, &$form_state, $nonaicte_book)
 		'#value' => l(t('Cancel'), 'manage_proposal')
 	);
 	return $form;
+}
+function manage_ajax_get_city_list_callback($form, $form_state)
+{
+    $state_default_value = $form_state['values']['all_state'];
+	//var_dump($state_default_value);
+    //$district_default_value = $form_state['values']['district'];
+    if ($state_default_value != '0')
+    {
+        $form['city']['#options'] = _tbc_list_of_cities($state_default_value);
+        $commands[] = ajax_command_replace("#ajax-city-list-replace", drupal_render($form['city']));
+        $form['pincode']['#options'] =  array('0' => '- Select -');
+        $commands[] = ajax_command_replace("#ajax-pincode-list-replace", drupal_render($form['pincode']));
+    }else{
+        $form['city']['#options'] = array('0' => '- Select -');
+        $commands[] = ajax_command_replace("#ajax-city-list-replace", drupal_render($form['city']));
+    }
+    return array(
+        '#type' => 'ajax',
+        '#commands' => $commands
+    );
+}
+
+function manage_ajax_get_city_pincode_list_callback($form, $form_state)
+{
+    $city_default_value = $form_state['values']['city'];
+    $state_default_value = $form_state['values']['all_state'];
+    //$district_default_value = $form_state['values']['district'];
+	//var_dump($city_default_value);
+    if ($city_default_value != '0')
+    {
+        $form['pincode']['#options'] = _tbc_list_of_city_pincode($city_default_value,$state_default_value);
+        $commands[] = ajax_command_replace("#ajax-pincode-list-replace", drupal_render($form['pincode']));
+    }else{
+        $form['pincode']['#options'] =  array('0' => '- Select -');
+        $commands[] = ajax_command_replace("#ajax-pincode-list-replace", drupal_render($form['pincode']));
+    }
+    return array(
+        '#type' => 'ajax',
+        '#commands' => $commands
+    );
 }
 function proposal_edit_form_validate($form, &$form_state)
 {
