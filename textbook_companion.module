@@ -1213,11 +1213,11 @@ function delete_file($file_id)
 	}
 }
 
-function _tbc_list_of_city_pincode($city=Null, $state=NULL, $district=NULL)
+function _tbc_list_of_city_pincode($city=Null, $state=NULL)
 {
 	$pincode = array();
 	if($city){
-		$pincode_list = db_query("SELECT pincode FROM all_india_pincode WHERE city = :city AND state = :state AND district = :district", array(':city' => $city,':state'=> $state, ':district' => $district));
+		$pincode_list = db_query("SELECT pincode FROM all_india_pincode WHERE city = :city AND state = :state", array(':city' => $city,':state'=> $state));
 		while ($pincode_list_data = $pincode_list->fetchObject())
 		{
 			$pincode[$pincode_list_data->pincode] = $pincode_list_data->pincode;
@@ -1228,12 +1228,11 @@ function _tbc_list_of_city_pincode($city=Null, $state=NULL, $district=NULL)
 	}
 	return $pincode;
 }
-
-function _tbc_list_of_cities($state=Null, $district=NULL)
+function _tbc_list_of_cities($state=Null)
 {
 	$city = array(''=> '- Select -');
 	if($state){
-		$city_list = db_query("SELECT city FROM all_india_pincode WHERE state = :state AND district = :district ORDER BY city ASC", array(':state'=> $state, ':district' =>$district));
+		$city_list = db_query("SELECT city FROM all_india_pincode WHERE state = :state ORDER BY city ASC", array(':state'=> $state));
 		while ($city_list_data = $city_list->fetchObject())
 		{
 			$city[$city_list_data->city] = $city_list_data->city;
