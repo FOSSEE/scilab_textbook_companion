@@ -177,7 +177,7 @@ FOSSEE, IIT Bombay', array(
 			$preference1_data = $result->fetchObject();
 			/*$preference2_q = db_query("SELECT * FROM {textbook_companion_preference} WHERE proposal_id = %d AND pref_number = %d LIMIT 1", $params['proposal_disapproved']['proposal_id'], 2);
 			$preference2_data = db_fetch_object($preference2_q);*/
-			$query = db_select('textbook_companion_preference');
+			/*$query = db_select('textbook_companion_preference');
 			$query->fields('textbook_companion_preference');
 			$query->condition('proposal_id', $params['proposal_disapproved']['proposal_id']);
 			$query->condition('pref_number', 2);
@@ -195,10 +195,10 @@ Edition : ' . $preference2_data->edition . '
 Year of publication : ' . $preference2_data->year . '
 Category : ' . $preference2_data->category_name . '
 ';
-			}
+			}*/
 			/*$preference3_q = db_query("SELECT * FROM {textbook_companion_preference} WHERE proposal_id = %d AND pref_number = %d LIMIT 1", $params['proposal_disapproved']['proposal_id'], 3);
 			$preference3_data = db_fetch_object($preference3_q);*/
-			$query = db_select('textbook_companion_preference');
+			/*$query = db_select('textbook_companion_preference');
 			$query->fields('textbook_companion_preference');
 			$query->condition('proposal_id', $params['proposal_disapproved']['proposal_id']);
 			$query->condition('pref_number', 3);
@@ -216,7 +216,7 @@ Edition : ' . $preference3_data->edition . '
 Year of publication : ' . $preference3_data->year . '
 Category : ' . $preference3_data->category_name . '
 ';
-			}
+			} */
 			$user_data = user_load($params['proposal_disapproved']['user_id']);
 			$message['headers'] = $params['proposal_disapproved']['headers'];
 			$message['subject'] = t('[!site_name] Your book proposal has been disapproved', array(
@@ -253,12 +253,8 @@ ISBN No. : ' . $preference1_data->isbn . '
 Publisher and Place : ' . $preference1_data->publisher . '
 Edition : ' . $preference1_data->edition . '
 Year of publication : ' . $preference1_data->year . '
-Category : ' . $preference1_data->category_name . ''.
+Category : ' . $preference1_data->category_name . '
 
-$book_preference2
-.' '.
-$book_preference2
-.'
 
 Best Wishes,
 
